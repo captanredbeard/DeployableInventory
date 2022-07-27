@@ -1,0 +1,11 @@
+{
+	"MODNAME": "auto",
+	"MODFOLDER": "auto",
+	"VERSIONFILE": "auto",
+	"RELEASESDIR": "Releases",
+	"CHANGELOG": "ChangeLog.md",
+	"DRAFT": false,
+	"PRERELEASE": false,
+	"SPACEDOCK_ID": "",
+	"FORUM_ID": ""
+}
