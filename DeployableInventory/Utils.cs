@@ -7,12 +7,12 @@ using KSP.Localization;
 
 
 
-namespace HabUtils
+namespace DeployableInventory
 {
   public static class Utils
   {
 
-    public static string modName = "HabUtils";
+    public static string modName = "DeployableInventory";
 
     /// Sets up an animation for KSP purposes and returns it
     public static AnimationState SetUpAnimation(string animationName, Part part, int layer)

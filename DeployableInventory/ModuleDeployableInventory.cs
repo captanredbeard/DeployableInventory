@@ -6,7 +6,7 @@ using UnityEngine;
 using KSP.Localization;
 
 
-namespace HabUtils
+namespace DeployableInventory
 {
     public enum DeployState
     {
@@ -170,21 +170,21 @@ namespace HabUtils
                 ;
 
             if (!Retractable)
-                baseInfo += "\n\n" + Localizer.Format("#LOC_SSPX_ModuleDeployableHabitat_PartInfo_NoRetract");
+                baseInfo += "\n\n" + Localizer.Format("#LOC_DI_ModuleDeployableInventory_PartInfo_NoRetract");
             if (DeployResource != "")
             {
                 PartResourceDefinition defn = PartResourceLibrary.Instance.GetDefinition(DeployResource);
-                baseInfo += "\n\n" + Localizer.Format("#LOC_SSPX_ModuleDeployableHabitat_PartInfo_Resources", defn.displayName, DeployResourceAmount.ToString("F2"));
+                baseInfo += "\n\n" + Localizer.Format("#LOC_DI_ModuleDeployableInventory_PartInfo_Resources", defn.displayName, DeployResourceAmount.ToString("F2"));
             }
             if (CrewToDeploy > 0)
             {
                 if (CrewSkillNeeded == "")
                 {
-                    baseInfo += "\n\n" + Localizer.Format("#LOC_SSPX_ModuleDeployableHabitat_PartInfo_NeedsCrewUnskilled", CrewToDeploy.ToString("F0"));
+                    baseInfo += "\n\n" + Localizer.Format("#LOC_DI_ModuleDeployableInventory_PartInfo_NeedsCrewUnskilled", CrewToDeploy.ToString("F0"));
                 }
                 else
                 {
-                    baseInfo += "\n\n" + Localizer.Format("#LOC_SSPX_ModuleDeployableHabitat_PartInfo_NeedsCrew", CrewToDeploy.ToString("F0"), Localizer.Format(CrewSkillNeededName));
+                    baseInfo += "\n\n" + Localizer.Format("#LOC_DI_ModuleDeployableInventory_PartInfo_NeedsCrew", CrewToDeploy.ToString("F0"), Localizer.Format(CrewSkillNeededName));
                 }
             }
 
@@ -250,7 +250,7 @@ namespace HabUtils
             {
                 deployAnimation = Utils.SetUpAnimation(DeployAnimationName, this.part, AnimationLayer);
                 if (deployAnimation == null)
-                    Utils.LogError("[ModuleDeployableHabitat]: Could not find animation");
+                    Utils.LogError("[ModuleDeployableInventory]: Could not find animation");
                 else
                 {
 
@@ -279,14 +279,12 @@ namespace HabUtils
                 deployState = DeployState.Deployed;
                 if (DeployAnimationName != "")
                     deployAnimation.normalizedTime = 0.0f;
-                CreateIVA();
             }
             else
             {
                 deployState = DeployState.Retracted;
                 if (DeployAnimationName != "")
                     deployAnimation.normalizedTime = 1.0f;
-                DestroyIVA();
                 DisableConverters();
             }
             RefreshPartData();
@@ -420,18 +418,17 @@ namespace HabUtils
         /// Called to start deflation
         protected virtual void StartRetract()
         {
-            Utils.Log("[ModuleDeployableHabitat]: Retract Started");
+            Utils.Log("[ModuleDeployableInventory]: Retract Started");
             deployState = DeployState.Retracting;
             AddRemoveCargoInventory(false);
             DisableConverters();
-            DestroyIVA();
             RefreshPartData();
 
         }
         /// Called to start deploy
         protected virtual void StartDeploy()
         {
-            Utils.Log("[ModuleDeployableHabitat]: Deploy Started");
+            Utils.Log("[ModuleDeployableInventory]: Deploy Started");
             deployState = DeployState.Deploying;
             if (HighLogic.LoadedSceneIsFlight && DeployResource != "")
             {
@@ -442,7 +439,7 @@ namespace HabUtils
         /// Execute actions on deflation completion
         protected virtual void FinishRetract()
         {
-            Utils.Log("[ModuleDeployableHabitat]: Retract Finished");
+            Utils.Log("[ModuleDeployableInventory]: Retract Finished");
             deployState = DeployState.Retracted;
             SetDragCubeState(1.0f);
             DisableConverters();
@@ -453,14 +450,13 @@ namespace HabUtils
         /// Execute actions on deploy completion
         protected virtual void FinishDeploy()
         {
-            Utils.Log("[ModuleDeployableHabitat]: Deploy Finished");
+            Utils.Log("[ModuleDeployableInventory]: Deploy Finished");
 
             deployState = DeployState.Deployed;
             Deployed = true;
             SetDragCubeState(0.0f);
 
             AddRemoveCargoInventory(Deployed);
-            CreateIVA();
             RefreshPartData();
         }
 
@@ -596,26 +592,6 @@ namespace HabUtils
         }
 #endif
 
-
-
-
-
-        /// Creates the IVA space
-        /// TODO: Implement me
-        protected void CreateIVA()
-        {
-            if (HighLogic.LoadedSceneIsFlight)
-                this.part.SpawnIVA();
-        }
-
-        /// Destroys the IVA space
-        /// TODO: Implement me
-        protected void DestroyIVA()
-        {
-            if (HighLogic.LoadedSceneIsFlight)
-                this.part.DespawnIVA();
-        }
-
         /// Checks to see if we can deploy
         protected bool CanDeploy()
         {
@@ -646,12 +622,12 @@ namespace HabUtils
                     string msg;
                     if (CrewSkillNeeded == "")
                     {
-                        msg = Localizer.Format("#LOC_SSPX_ModuleDeployableHabitat_Message_CantDeployCrewUnskilled",
+                        msg = Localizer.Format("#LOC_DI_ModuleDeployableInventory_Message_CantDeployCrewUnskilled",
                                     part.partInfo.title, CrewToDeploy);
                     }
                     else
                     {
-                        msg = Localizer.Format("#LOC_SSPX_ModuleDeployableHabitat_Message_CantDeployCrew",
+                        msg = Localizer.Format("#LOC_DI_ModuleDeployableInventory_Message_CantDeployCrew",
                                     part.partInfo.title, CrewToDeploy, Localizer.Format(CrewSkillNeededName));
                     }
                     ScreenMessages.PostScreenMessage(msg, 5f, ScreenMessageStyle.UPPER_CENTER);
@@ -670,7 +646,7 @@ namespace HabUtils
                 res = Math.Round(res);
                 if (res < DeployResourceAmount)
                 {
-                    var msg = Localizer.Format("#LOC_SSPX_ModuleDeployableHabitat_Message_CantDeployResources",
+                    var msg = Localizer.Format("#LOC_DI_ModuleDeployableInventory_Message_CantDeployResources",
                                 part.partInfo.title, DeployResourceAmount.ToString("F2"), defn.displayName);
                     ScreenMessages.PostScreenMessage(msg, 5f, ScreenMessageStyle.UPPER_CENTER);
                     return false;
@@ -691,10 +667,10 @@ namespace HabUtils
                 return false;
 
 
-            // Cannot retract if crew are present
-            if (part.protoModuleCrew.Count > 0)
+            // Cannot retract if inventory is not empty
+            if (!inventory.InventoryIsEmpty)
             {
-                var msg = Localizer.Format("#LOC_SSPX_ModuleDeployableHabitat_Message_CantRetractCrew",
+                var msg = Localizer.Format("#LOC_DI_ModuleDeployableInventory_Message_CantRetractInventory",
                             part.partInfo.title);
                 ScreenMessages.PostScreenMessage(msg, 5f, ScreenMessageStyle.UPPER_CENTER);
                 return false;
