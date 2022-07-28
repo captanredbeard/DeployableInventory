@@ -13,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		DeployableInventory.version = DeployableInventory.version
 		README.md = README.md
 		release.py = release.py
+		GameData\DeployableInventory\Configs\SSPXDeployableInventory.cfg = GameData\DeployableInventory\Configs\SSPXDeployableInventory.cfg
+		GameData\DeployableInventory\Configs\SSPXDeployableInventoryScaled.cfg = GameData\DeployableInventory\Configs\SSPXDeployableInventoryScaled.cfg
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Localization", "Localization", "{2CACE644-FDB7-4779-A7CB-EACABF02CEC0}"

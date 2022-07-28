@@ -37,20 +37,24 @@ namespace HabUtils
 
         // Crew capacity when deployd
         [KSPField(isPersistant = false)]
-        public float DeployedInventoryCap = 1000;
+        public float DeployedVolumeLimit = 100;
 
         // Number of inventory slots when deployd
         [KSPField(isPersistant = false)]
-        public int DeployedInventorySlots = 6;
+        public int DeployedInventorySlots = 3;
 
-        // The space this part occupies when packed inside an inventory container.If this is set to < 0 then the part can be manipulated in EVA construction mode but cannot be placed inside inventory containers.
-        public float packedVolume = 0;
+        // The space this part occupies when packed inside an inventory container.
+        // If this is set to < 0 then the part can be manipulated in EVA construction mode
+        // but cannot be placed inside inventory containers.
+        protected float packedVolume = 10;
         // The tooltip for inventory cargo parts, shows up when mouse is over a part icon during flight.
-        public string inventoryTooltip = "tooltip";
-        // The number of parts of the same kind and variant that can be stacked in a single inventory slot. Defaults to 1, so leave it out if you DON’T want the part to be stackable.
-        public int stackableQuantity = 0;
+        protected string inventoryTooltip = "tooltip";
+        // The number of parts of the same kind and variant that can be stacked in a single inventory slot.
+        protected int stackingCapacity = 1;
 
-
+        protected ModuleCargoPart cargo;
+        protected ModuleInventoryPart inventory;
+        protected ConfigNode cargoPartsSaveNode;
 
         // Is this a single-use module?
         [KSPField(isPersistant = true)]
@@ -139,7 +143,32 @@ namespace HabUtils
 
         public override string GetInfo()
         {
-            string baseInfo = Localizer.Format("<<1>>", DeployedInventoryCap.ToString("F0"));
+            var cargos = part.Modules.OfType<ModuleCargoPart>();
+            Debug.Log("GetInfo packedVolume Before: " + packedVolume);
+            if (cargos.Count() == 1)
+            {
+                var cargo = cargos.First();
+                packedVolume = cargo.packedVolume;
+                stackingCapacity = cargo.stackableQuantity;
+                inventoryTooltip = cargo.inventoryTooltip;
+            }
+            Debug.Log("GetInfo packedVolume After: " + packedVolume);
+
+            string baseInfo =
+                Localizer.Format("#LOC_DI_ModuleDeployableInventory_PartInfo_Note") + "<br><br>"
+
+                + Localizer.Format("#LOC_DI_ModuleDeployableInventory_PartInfo_DeflatedState") + "<br>"           
+                + "  " + Localizer.Format("#autoLOC_8003414"/*Packed Volume*/)+": " + packedVolume.ToString("F0")
+                + Localizer.Format("#LOC_DI_ModuleDeployableInventory_PartInfo_Liter") + "<br>"
+                +"  " + Localizer.Format("#autoLOC_8003418"/*Stacking Capacity*/) + ": " + stackingCapacity + "<br><br>"
+
+                + Localizer.Format("#LOC_DI_ModuleDeployableInventory_PartInfo_InflatedState") + "<br>"
+
+                + "  " + Localizer.Format("#autoLOC_8002218"/*Inventory Slots*/) + ": " + DeployedInventorySlots + "<br>"
+                + "  " + Localizer.Format("#autoLOC_8003415"/*Volume Limit*/) + ": " + DeployedVolumeLimit.ToString("F0") 
+                + Localizer.Format("#LOC_DI_ModuleDeployableInventory_PartInfo_Liter")
+                ;
+
             if (!Retractable)
                 baseInfo += "\n\n" + Localizer.Format("#LOC_SSPX_ModuleDeployableHabitat_PartInfo_NoRetract");
             if (DeployResource != "")
@@ -163,11 +192,11 @@ namespace HabUtils
         }
         public string GetModuleTitle()
         {
-            return "Expandable Habitat";
+            return "Expandable Inventory";
         }
         public override string GetModuleDisplayName()
         {
-            return Localizer.Format("#LOC_SSPX_ModuleDeployableHabitat_ModuleTitle");
+            return Localizer.Format("#LOC_DI_ModuleDeployableInventory_PartInfo_Title");
         }
 
         public float GetModuleMass(float baseMass, ModifierStagingSituation situation)
@@ -182,14 +211,7 @@ namespace HabUtils
             return ModifierChangeWhen.FIXED;
         }
 
-        public override void OnLoad(ConfigNode node)
-        {
 
-            if (HighLogic.LoadedScene == GameScenes.LOADING)
-            {
-
-            }
-        }
         public virtual void Start()
         {
             if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor)
@@ -458,43 +480,7 @@ namespace HabUtils
         }
 
 
-        // From @Tanihwa
-        void ShowVolume(Part part)
-        {
-            var mfList = part.FindModelComponents<MeshFilter>();
-            double vol = 0;
-            foreach (var mf in mfList)
-            {
-                Debug.Log("Part: " + part.partName + ", mesh: " + mf.name);
-                Mesh mesh = mf.sharedMesh;
-                Vector3[] verts = mesh.vertices;
-                for (int sm = 0; sm < mesh.subMeshCount; sm++)
-                {
-                    int[] tris = mesh.GetTriangles(sm);
-                    for (int i = 0; i < tris.Length; i += 3)
-                    {
-                        Vector3d a = verts[tris[i]];
-                        Vector3d b = verts[tris[i + 1]];
-                        Vector3d c = verts[tris[i + 2]];
-                        vol += Vector3d.Dot(c, Vector3d.Cross(a, b)) / 6;
-                    }
-                }
-            }
 
-            vol *= 1000;
-
-            Bounds bounds = default(Bounds);
-
-            foreach (Bounds rendererBound in PartGeometryUtil.GetRendererBounds(part))
-                bounds.Encapsulate(rendererBound);
-
-            float boundvol = (float)(bounds.size.x * bounds.size.y * bounds.size.z) * 1000f;
-
-            Debug.Log("Part: " + part.partName + " " + 
-                bounds.size.x.ToString("F2") + " " + bounds.size.y.ToString("F2") + " " + bounds.size.z.ToString("F2") +
-                ", boundvol: " + boundvol.ToString("F2") +
-                ", Tanihwavol: " + vol.ToString("F2"));
-        }
 
         /// Set the crew capacity of the part
         /// TODO: Implement me
@@ -509,42 +495,54 @@ namespace HabUtils
             Debug.Log("ModuleCargoPart: " + part.Modules.OfType<ModuleCargoPart>().Count() );
             Debug.Log("ModuleInventoryPart: " + part.Modules.OfType<ModuleInventoryPart>().Count());
 
-            var cargos = part.Modules.OfType<ModuleCargoPart>();
-            var invs = part.Modules.OfType<ModuleInventoryPart>();
+            if (cargo == null)
+            {
+                var cargos = part.Modules.OfType<ModuleCargoPart>();
+                if (cargos.Count() == 1)
+                {
+                    cargo = cargos.Single();
+                }
+            }
+
+            if (inventory == null)
+            {
+                var inventorys = part.Modules.OfType<ModuleInventoryPart>();
+                if (inventorys.Count() == 1)
+                {
+                    inventory = inventorys.Single();
+                }
+            }
 
             if (flag)
             {
-                if (cargos.Count() == 1)
+                if (cargo != null)
                 {
-                    var cargo = cargos.Single();
-
                     packedVolume = cargo.packedVolume;
-                    stackableQuantity = cargo.stackableQuantity;
+                    stackingCapacity = cargo.stackableQuantity;
                     inventoryTooltip = cargo.inventoryTooltip;
                     part.RemoveModule(cargo);
                 }
 
-                if (invs.Count() == 0)
+                if (inventory == null)
                 {
-                    var inv = (ModuleInventoryPart)part.AddModule("ModuleInventoryPart", true);
-                    inv.OnStart(part.GetModuleStartState());
-                    inv.packedVolumeLimit = DeployedInventoryCap;
-                    inv.InventorySlots = DeployedInventorySlots;
+                    inventory = (ModuleInventoryPart)part.AddModule("ModuleInventoryPart", true);
+                    inventory.OnStart(part.GetModuleStartState());
+                    inventory.packedVolumeLimit = DeployedVolumeLimit;
+                    inventory.InventorySlots = DeployedInventorySlots;
                 }
             }
             else
             {
-                if (invs.Count() == 1)
+                if (inventory != null)
                 {
-                    var inv = invs.Single();
-                    part.RemoveModule(inv);
+                    part.RemoveModule(inventory);
                 }
 
-                if (cargos.Count() == 0)
+                if (cargo == null)
                 {
-                    var cargo = (ModuleCargoPart)part.AddModule("ModuleCargoPart", true);
+                    cargo = (ModuleCargoPart)part.AddModule("ModuleCargoPart", true);
                     cargo.packedVolume = packedVolume;
-                    cargo.stackableQuantity = stackableQuantity;
+                    cargo.stackableQuantity = stackingCapacity;
                     cargo.inventoryTooltip = inventoryTooltip;
                 }
             }
@@ -552,9 +550,55 @@ namespace HabUtils
             Debug.Log("AddRemoveCargoInventoryAfter: Deployed: " + flag);
             Debug.Log("ModuleCargoPart: " + part.Modules.OfType<ModuleCargoPart>().Count());
             Debug.Log("ModuleInventoryPart: " + part.Modules.OfType<ModuleInventoryPart>().Count());
-            ShowVolume(part);
 
         }
+
+
+
+        ///-----------------Life Cycle-----------------------///
+        ///
+#if true
+        public override void OnLoad(ConfigNode node)
+        {
+            if (Deployed)
+                cargoPartsSaveNode = node.GetNode("DeployableInventoryNode");
+            //if (cargoPartsSaveNode == null)
+            //    throw new Exception("DeployableInventoryNode Node Not Found!");
+
+        }
+#endif
+#if true
+        public override void OnSave(ConfigNode node)
+        {
+            if (Deployed && inventory != null)
+             inventory.OnSave(node.AddNode("DeployableInventoryNode"));   
+        }
+
+#endif
+#if true
+        public override void OnStartFinished(StartState state)
+        {
+            if (Deployed && cargoPartsSaveNode != null && inventory != null)
+            {
+                ///Load Parts in inventory
+                StoredPart tempStoredPart = new StoredPart("Name", 0);
+                ConfigNode[] cargoNodeArray = cargoPartsSaveNode.GetNode("STOREDPARTS").GetNodes("STOREDPART");
+                foreach (ConfigNode cn in cargoNodeArray)
+                {
+                    tempStoredPart.Load(cn);
+                    inventory.StoreCargoPartAtSlot(tempStoredPart.snapshot, tempStoredPart.slotIndex);
+                    if (tempStoredPart.CanStack)
+                    {
+                        inventory.UpdateStackAmountAtSlot(tempStoredPart.slotIndex, tempStoredPart.quantity, tempStoredPart.variantName);
+                    }
+                }
+            }
+        }
+#endif
+
+
+
+
 
         /// Creates the IVA space
         /// TODO: Implement me
