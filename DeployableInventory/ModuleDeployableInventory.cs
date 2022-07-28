@@ -152,6 +152,7 @@ namespace DeployableInventory
                 stackingCapacity = cargo.stackableQuantity;
                 inventoryTooltip = cargo.inventoryTooltip;
             }
+
             Debug.Log("GetInfo packedVolume After: " + packedVolume);
 
             string baseInfo =
