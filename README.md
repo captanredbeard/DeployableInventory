@@ -1,4 +1,4 @@
-### CommNet Antennas Info
+### Deployable Inventory
 [![Version](https://img.shields.io/github/release/yalov/DeployableInventory.svg?label=Version&colorB=4CC61E)](https://github.com/yalov/DeployableInventory/releases) 
 [![Last Release](https://img.shields.io/github/release-date/yalov/DeployableInventory.svg?label=Last%20Release&colorB=99C611)](https://github.com/yalov/DeployableInventory/releases) 
 <!--
