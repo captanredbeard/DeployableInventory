@@ -10,7 +10,7 @@ make sure, that ssh is set up
 
 Public domain license.
 https://github.com/yalov/SpeedUnitAnnex/blob/master/release.py
-version: 24
+version: 25
 
 Script loads release-arhive to github and spacedock
 you need to set values in the release.json
@@ -174,52 +174,50 @@ if __name__ == '__main__':
     print("SPACEDOCK:")
     if not SD_ID:
         print("Spacedock number is not found in the json.")
-        input("Press Enter to exit")
-        sys.exit(-1)
-
-    print("Accessing to Spacedock...")
-    try:
-        all_versions = [v['name'] for v in GetSpacedockKSPVersions()]
-    except:
-        print("Failed. Could not access to Spacedock.")
-        input("Press Enter to exit")
-        sys.exit(-1)
-
-    if KSP_VER not in all_versions:
-        print("KSP {} is not supported by Spacedock,\nlast supported version is KSP {}"
-              .format(KSP_VER, all_versions[0]))
-        print("trying to ignore the patch... ")
-        KSP_VER = get_version(VERSIONFILE, "KSP_VERSION", True)
+    else:
+        print("Accessing to Spacedock...")
+        try:
+            all_versions = [v['name'] for v in GetSpacedockKSPVersions()]
+        except:
+            print("Failed. Could not access to Spacedock.")
+            input("Press Enter to exit")
+            sys.exit(-1)
+    
         if KSP_VER not in all_versions:
             print("KSP {} is not supported by Spacedock,\nlast supported version is KSP {}"
                 .format(KSP_VER, all_versions[0]))
-            print("Release with the last supported by Spacedock {} tag?".format(all_versions[0]))
-            if input("[y/N]: ") == 'y':
-                KSP_VER = all_versions[0]
-            else:
-                input("Press Enter to exit")
-                sys.exit(-1)
-
-    print("KSP {} is supported by Spacedock.".format(KSP_VER))
-
-    mod_details = GetSpacedockModDetails(SD_ID)
-
-    if not mod_details or 'error' in mod_details:
-        print("The mod #{} isn't found.".format(SD_ID))
-        input("Press Enter to exit")
-        sys.exit(-1)
-
-    print("Spacedock info:\nID: {}, NAME: {}\nLast Release {} (KSP {})".format(
-        SD_ID, mod_details['name'],
-        mod_details['versions'][0]['friendly_version'],
-        mod_details['versions'][0]['game_version']
-        ))
-
-    print("Publish {} (KSP {}) to the Spacedock?".format(VERSION, KSP_VER))
-    if input("[y/N]: ") == 'y':
-        resp = PublishToSpacedock(SD_ID, ZIPFILE, LAST_CHANGE, VERSION, KSP_VER, SD_LOGIN, SD_PASS)
-        if not 'error' in resp:
-            is_published = True
+            print("trying to ignore the patch... ")
+            KSP_VER = get_version(VERSIONFILE, "KSP_VERSION", True)
+            if KSP_VER not in all_versions:
+                print("KSP {} is not supported by Spacedock,\nlast supported version is KSP {}"
+                    .format(KSP_VER, all_versions[0]))
+                print("Release with the last supported by Spacedock {} tag?".format(all_versions[0]))
+                if input("[y/N]: ") == 'y':
+                    KSP_VER = all_versions[0]
+                else:
+                    input("Press Enter to exit")
+                    sys.exit(-1)
+    
+        print("KSP {} is supported by Spacedock.".format(KSP_VER))
+    
+        mod_details = GetSpacedockModDetails(SD_ID)
+    
+        if not mod_details or 'error' in mod_details:
+            print("The mod #{} isn't found.".format(SD_ID))
+            input("Press Enter to exit")
+            sys.exit(-1)
+    
+        print("Spacedock info:\nID: {}, NAME: {}\nLast Release {} (KSP {})".format(
+            SD_ID, mod_details['name'],
+            mod_details['versions'][0]['friendly_version'],
+            mod_details['versions'][0]['game_version']
+            ))
+    
+        print("Publish {} (KSP {}) to the Spacedock?".format(VERSION, KSP_VER))
+        if input("[y/N]: ") == 'y':
+            resp = PublishToSpacedock(SD_ID, ZIPFILE, LAST_CHANGE, VERSION, KSP_VER, SD_LOGIN, SD_PASS)
+            if not 'error' in resp:
+                is_published = True
 
     if FORUM_ID and is_published:
         import webbrowser

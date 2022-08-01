@@ -156,16 +156,19 @@ namespace DeployableInventory
             Debug.Log("GetInfo packedVolume After: " + packedVolume);
 
             string baseInfo =
-                Localizer.Format("#LOC_DI_ModuleDeployableInventory_PartInfo_Note") + "<br><br>"
+                Localizer.Format("#LOC_DI_ModuleDeployableInventory_PartInfo_Note") + "\n\n"
 
-                + Localizer.Format("#LOC_DI_ModuleDeployableInventory_PartInfo_DeflatedState") + "<br>"           
-                + "  " + Localizer.Format("#autoLOC_8003414"/*Packed Volume*/)+": " + packedVolume.ToString("F0")
-                + Localizer.Format("#LOC_DI_ModuleDeployableInventory_PartInfo_Liter") + "<br>"
-                +"  " + Localizer.Format("#autoLOC_8003418"/*Stacking Capacity*/) + ": " + stackingCapacity + "<br><br>"
+                + Localizer.Format("#LOC_DI_ModuleDeployableInventory_PartInfo_DeflatedState") + "\n"
+                + "  " + Localizer.Format("#autoLOC_8003414"/*Packed Volume*/) + ": " + packedVolume.ToString("F0")
+                + Localizer.Format("#LOC_DI_ModuleDeployableInventory_PartInfo_Liter") + "\n";
 
-                + Localizer.Format("#LOC_DI_ModuleDeployableInventory_PartInfo_InflatedState") + "<br>"
+            if (stackingCapacity > 1)
+                baseInfo += "  " + Localizer.Format("#autoLOC_8003418"/*Stacking Capacity*/) + ": " + stackingCapacity + "\n";
 
-                + "  " + Localizer.Format("#autoLOC_8002218"/*Inventory Slots*/) + ": " + DeployedInventorySlots + "<br>"
+
+            baseInfo += "\n"
+                + Localizer.Format("#LOC_DI_ModuleDeployableInventory_PartInfo_InflatedState") + "\n"
+                + "  " + Localizer.Format("#autoLOC_8002218"/*Inventory Slots*/) + ": " + DeployedInventorySlots + "\n"
                 + "  " + Localizer.Format("#autoLOC_8003415"/*Volume Limit*/) + ": " + DeployedVolumeLimit.ToString("F0") 
                 + Localizer.Format("#LOC_DI_ModuleDeployableInventory_PartInfo_Liter")
                 ;
