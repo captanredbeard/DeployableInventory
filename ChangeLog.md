@@ -1,5 +1,10 @@
 ## ChangeLog:
 
+### Version 0.9.5
+ * add 2 scaled 3.75m parts
+ * CCK supports
+ * CrewToDeploy req.
+
 ### Version 0.9.4
  * add @thumbs inventory
 
