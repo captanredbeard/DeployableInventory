@@ -1,0 +1,7 @@
+SEQ 3C Conformal 60v / 3s = 20 volume per slot
+SEQ 3 Radial 180v / 3s = 60 volume per slot
+SEQ 9 Inline 650v / 9s = 72.2 Volume per slot
+SEQ 24 Inline 2500v / 24s = 104.16 Volume per slot
+
+Most command pods have 200 to 300 volume in midsize capsules and ~400 for large capsules
+SSPX utility modules have 400 Volume and 6 slots
