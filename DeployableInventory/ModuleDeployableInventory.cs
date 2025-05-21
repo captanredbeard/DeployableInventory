@@ -32,8 +32,8 @@ namespace DeployableInventory
         //public int RetractedCrewCapacity = 0;
 
         // Crew capacity when deployd
-        //[KSPField(isPersistant = false)]
-        //public int DeployedCrewCapacity = 2;
+        [KSPField(isPersistant = false)]
+        public int DeployedCargoCapacity = 2;
 
         // Crew capacity when deployd
         [KSPField(isPersistant = false)]
